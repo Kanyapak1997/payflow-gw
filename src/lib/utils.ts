@@ -5,6 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Builds a browser-navigable URL for an in-app route, respecting the base path
+ * the app was deployed under. Only needed for real anchors (new-tab links) —
+ * React Router's own <Link> already applies the router basename.
+ */
+export function appUrl(routePath: string) {
+  // import.meta.env.BASE_URL always ends with a slash.
+  return `${import.meta.env.BASE_URL}${routePath.replace(/^\//, '')}`
+}
+
 /** Promise-based delay used to pace the simulated payment states. */
 export function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))

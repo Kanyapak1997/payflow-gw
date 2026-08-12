@@ -9,7 +9,8 @@ the full payment lifecycle, from creating a payment to hosted checkout, 3-D Secu
 webhooks and refunds.
 
 [Features](#features) · [Demo flow](#the-demo-payment-flow) · [Architecture](#architecture) ·
-[Getting started](#local-installation) · [Sandbox test data](#sandbox-test-data)
+[Getting started](#local-installation) · [Deployment](#deployment) ·
+[Sandbox test data](#sandbox-test-data)
 
 </div>
 
@@ -199,6 +200,45 @@ Then open <http://localhost:5173>.
 | `npm run preview` | Preview the production build |
 | `npm run typecheck` | Type-check only |
 | `npm run lint` | Lint with oxlint |
+
+---
+
+## Deployment
+
+### GitHub Pages
+
+`.github/workflows/deploy.yml` builds and publishes the site on every push to `main`, and can be
+run manually from the **Actions** tab.
+
+One-time setup: **Settings → Pages → Build and deployment → Source → GitHub Actions.**
+
+That's it — the workflow resolves the base path itself. For a project site it builds with
+`VITE_BASE_PATH=/<repo>/`; for a user or organisation site (`<owner>.github.io`) it builds at the
+domain root.
+
+Two details make a client-side-routed SPA work on Pages:
+
+- **Base path.** Vite's `base` comes from `VITE_BASE_PATH`, and React Router takes its `basename`
+  from `import.meta.env.BASE_URL`, so both the asset URLs and the routes live under the same
+  prefix. Use `appUrl()` from `src/lib/utils.ts` for any raw `<a href>` — React Router's `<Link>`
+  already handles it.
+- **Deep links.** Pages has no SPA rewrite, so `/transactions/TX-10291` would 404. A small Vite
+  plugin copies `index.html` to `404.html` at build time; Pages serves that for unknown paths and
+  the router takes over from there.
+
+To reproduce a Pages build locally:
+
+```bash
+VITE_BASE_PATH=/payflow-gw/ npm run build
+VITE_BASE_PATH=/payflow-gw/ npm run preview
+# → http://localhost:4173/payflow-gw/
+```
+
+### Anywhere else
+
+Any static host works. Run `npm run build` and serve `dist/`. If you deploy to a sub-path, set
+`VITE_BASE_PATH` accordingly; if your host has its own SPA fallback rule, point it at
+`index.html` and the generated `404.html` is simply unused.
 
 ---
 

@@ -22,71 +22,78 @@ function withSuspense(load: () => Promise<{ default: ComponentType }>) {
 const named = <K extends string>(key: K, load: () => Promise<Record<K, ComponentType>>) =>
   withSuspense(() => load().then((module) => ({ default: module[key] })))
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <DashboardLayout />,
+      children: [
+        { index: true, element: <Navigate to="/dashboard" replace /> },
+        { path: 'dashboard', element: <DashboardPage /> },
+        {
+          path: 'transactions',
+          element: named('TransactionsPage', () => import('@/pages/transactions/transactions-page')),
+        },
+        {
+          path: 'transactions/:transactionId',
+          element: named(
+            'TransactionDetailPage',
+            () => import('@/pages/transactions/transaction-detail-page'),
+          ),
+        },
+        {
+          path: 'payments',
+          element: named('PaymentsPage', () => import('@/pages/payments/payments-page')),
+        },
+        {
+          path: 'payments/create',
+          element: named('CreatePaymentPage', () => import('@/pages/payments/create-payment-page')),
+        },
+        {
+          path: 'payments/:paymentId',
+          element: named('PaymentCreatedPage', () => import('@/pages/payments/payment-created-page')),
+        },
+        {
+          path: 'payment-links',
+          element: named(
+            'PaymentLinksPage',
+            () => import('@/pages/payment-links/payment-links-page'),
+          ),
+        },
+        {
+          path: 'customers',
+          element: named('CustomersPage', () => import('@/pages/customers/customers-page')),
+        },
+        { path: 'developers', element: <Navigate to="/developers/api-keys" replace /> },
+        {
+          path: 'developers/api-keys',
+          element: named('ApiKeysPage', () => import('@/pages/developers/api-keys-page')),
+        },
+        {
+          path: 'developers/webhooks',
+          element: named('WebhooksPage', () => import('@/pages/developers/webhooks-page')),
+        },
+        {
+          path: 'developers/api-logs',
+          element: named('ApiLogsPage', () => import('@/pages/developers/api-logs-page')),
+        },
+        {
+          path: 'settings',
+          element: named('SettingsPage', () => import('@/pages/settings/settings-page')),
+        },
+      ],
+    },
+    // The hosted checkout is customer-facing and deliberately sits outside the
+    // merchant dashboard shell.
+    {
+      path: '/pay/:paymentId',
+      element: named('CheckoutPage', () => import('@/pages/checkout/checkout-page')),
+    },
+    { path: '*', element: <NotFoundPage /> },
+  ],
   {
-    path: '/',
-    element: <DashboardLayout />,
-    children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <DashboardPage /> },
-      {
-        path: 'transactions',
-        element: named('TransactionsPage', () => import('@/pages/transactions/transactions-page')),
-      },
-      {
-        path: 'transactions/:transactionId',
-        element: named(
-          'TransactionDetailPage',
-          () => import('@/pages/transactions/transaction-detail-page'),
-        ),
-      },
-      {
-        path: 'payments',
-        element: named('PaymentsPage', () => import('@/pages/payments/payments-page')),
-      },
-      {
-        path: 'payments/create',
-        element: named('CreatePaymentPage', () => import('@/pages/payments/create-payment-page')),
-      },
-      {
-        path: 'payments/:paymentId',
-        element: named('PaymentCreatedPage', () => import('@/pages/payments/payment-created-page')),
-      },
-      {
-        path: 'payment-links',
-        element: named(
-          'PaymentLinksPage',
-          () => import('@/pages/payment-links/payment-links-page'),
-        ),
-      },
-      {
-        path: 'customers',
-        element: named('CustomersPage', () => import('@/pages/customers/customers-page')),
-      },
-      { path: 'developers', element: <Navigate to="/developers/api-keys" replace /> },
-      {
-        path: 'developers/api-keys',
-        element: named('ApiKeysPage', () => import('@/pages/developers/api-keys-page')),
-      },
-      {
-        path: 'developers/webhooks',
-        element: named('WebhooksPage', () => import('@/pages/developers/webhooks-page')),
-      },
-      {
-        path: 'developers/api-logs',
-        element: named('ApiLogsPage', () => import('@/pages/developers/api-logs-page')),
-      },
-      {
-        path: 'settings',
-        element: named('SettingsPage', () => import('@/pages/settings/settings-page')),
-      },
-    ],
+    // Vite rewrites BASE_URL to the deployment base path (e.g. "/payflow-gw/"
+    // on GitHub Pages project sites), so every route resolves under it.
+    basename: import.meta.env.BASE_URL,
   },
-  // The hosted checkout is customer-facing and deliberately sits outside the
-  // merchant dashboard shell.
-  {
-    path: '/pay/:paymentId',
-    element: named('CheckoutPage', () => import('@/pages/checkout/checkout-page')),
-  },
-  { path: '*', element: <NotFoundPage /> },
-])
+)

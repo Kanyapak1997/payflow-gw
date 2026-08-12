@@ -18,6 +18,7 @@ import { TransactionStatusBadge } from '@/components/common/status-badge'
 import { JsonSection } from '@/components/common/json-viewer'
 import { usePaymentStore } from '@/stores/payment-store'
 import { formatCurrency, formatDateTime } from '@/lib/format'
+import { appUrl } from '@/lib/utils'
 
 export function PaymentCreatedPage() {
   const { paymentId = '' } = useParams()
@@ -192,7 +193,7 @@ export function PaymentCreatedPage() {
               </Link>
             </Button>
             <Button variant="ghost" size="sm" className="mt-1 w-full" asChild>
-              <a href={`/pay/${payment.id}`} target="_blank" rel="noreferrer">
+              <a href={appUrl(`/pay/${payment.id}`)} target="_blank" rel="noreferrer">
                 <ExternalLink />
                 Open checkout in a new tab
               </a>
